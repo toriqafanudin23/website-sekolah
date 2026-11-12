@@ -1,0 +1,80 @@
+import { cva, type VariantProps } from 'class-variance-authority'
+import { ArrowRight } from 'lucide-react'
+import type { ComponentProps } from 'react'
+import { Link } from 'react-router'
+import { cn } from '@/lib/cn'
+
+export const buttonVariants = cva(
+  [
+    'group relative isolate inline-flex items-center justify-center gap-2 overflow-hidden text-center font-bold',
+    'transition-colors duration-300 active:translate-y-px disabled:pointer-events-none disabled:opacity-60 motion-reduce:transition-none',
+    // Efek hover: warna baru menyapu dari kiri ke kanan di belakang label.
+    'before:absolute before:inset-0 before:-z-10 before:origin-left before:scale-x-0 before:transition-transform before:duration-300 before:ease-out',
+    'hover:before:scale-x-100 focus-visible:before:scale-x-100 motion-reduce:before:transition-none',
+  ],
+  {
+    variants: {
+      variant: {
+        /** Kuning: aksi utama di atas latar biru. Hover: menyapu ke navy, teks jadi kuning. */
+        primary: 'bg-accent text-ink before:bg-ink hover:text-accent focus-visible:text-accent',
+        /** Garis putih: aksi sekunder di atas latar biru. Hover: terisi kuning. */
+        outline: 'text-white ring-2 ring-white ring-inset before:bg-accent hover:text-ink focus-visible:text-ink',
+        /** Navy: aksi utama di atas latar kuning atau putih. Hover: menyapu ke biru. */
+        dark: 'bg-ink text-white before:bg-brand',
+        /** Garis navy: aksi sekunder di atas latar putih. Hover: terisi biru. */
+        outlineDark: 'text-ink ring-2 ring-ink ring-inset before:bg-brand hover:text-white focus-visible:text-white',
+      },
+      size: {
+        /** Ponsel: selebar kolom dengan target sentuh 48px. Desktop: selebar konten. */
+        md: 'min-h-12 w-full px-5 py-3.5 md:w-auto md:px-6',
+        /** Kompak, untuk di dalam navbar. */
+        sm: 'px-4.5 py-2.5',
+      },
+    },
+    defaultVariants: { variant: 'primary', size: 'md' },
+  },
+)
+
+interface SharedProps extends VariantProps<typeof buttonVariants> {
+  /** Menampilkan ikon panah di akhir label. */
+  withArrow?: boolean
+}
+
+type LinkButtonProps = SharedProps & ComponentProps<typeof Link>
+type NativeButtonProps = SharedProps & ComponentProps<'button'> & { to?: undefined }
+
+export type ButtonProps = LinkButtonProps | NativeButtonProps
+
+/**
+ * Tombol. Jika `to` diberikan, dirender sebagai tautan router
+ * (`<Link>`), selain itu sebagai `<button>` biasa.
+ */
+export function Button(props: ButtonProps) {
+  const { variant, size, withArrow, className, children, ...rest } = props
+  const classes = cn(buttonVariants({ variant, size }), className)
+  const content = (
+    <>
+      {children}
+      {withArrow && (
+        <ArrowRight
+          aria-hidden="true"
+          className="size-5 shrink-0 transition-transform duration-300 group-hover:translate-x-1.5 motion-reduce:transition-none"
+        />
+      )}
+    </>
+  )
+
+  if (rest.to !== undefined) {
+    return (
+      <Link className={classes} {...(rest as Omit<LinkButtonProps, keyof SharedProps>)}>
+        {content}
+      </Link>
+    )
+  }
+
+  return (
+    <button type="button" className={classes} {...(rest as ComponentProps<'button'>)}>
+      {content}
+    </button>
+  )
+}

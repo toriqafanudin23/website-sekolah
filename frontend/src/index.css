@@ -1,0 +1,285 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/public-sans';
+@import '@fontsource/young-serif';
+
+/*
+ * Design tokens (sumber: desain "Redesign SDN 1 Kembaran").
+ * Setiap token otomatis menjadi utility Tailwind, mis. `bg-brand`, `text-ink`,
+ * `font-display`, `max-w-site`, `shadow-nav`.
+ */
+@theme {
+  --font-sans: 'Public Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Young Serif', ui-serif, Georgia, serif;
+
+  --color-brand: #1740d6; /* biru utama */
+  --color-ink: #0e1b4d; /* navy: teks & permukaan gelap */
+  --color-accent: #ffd21f; /* kuning */
+  --color-muted: #44507a; /* teks sekunder di latar terang */
+  --color-tint: #dce5ff; /* teks sekunder di latar gelap */
+  --color-line: #c9d3f2; /* garis pemisah di latar terang */
+  --color-surface: #eaf0ff;
+  --color-canvas: #f5f8ff; /* latar area kerja panel admin */
+  --color-danger: #b3261e; /* pesan galat di latar putih */
+  --color-placeholder-line: #7c93e6; /* garis putus-putus kotak foto sementara */
+
+  --container-site: 75rem; /* 1200px */
+  --shadow-nav: 0 2px 14px rgb(14 27 77 / 0.18);
+  /* Bayangan keras (tanpa blur) sebagai ciri desain: kotak kuning di belakang foto dan kartu. */
+  --shadow-block: 8px 8px 0 var(--color-accent);
+  --shadow-block-ink: 6px 6px 0 var(--color-ink);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/*
+ * Tinggi navbar: satu sumber kebenaran untuk Navbar, Hero, dan halaman lain.
+ * Navbar menimpa (overlay) konten pertama, sehingga section pertama harus
+ * memberi ruang `pt-(--header-h)`.
+ */
+:root {
+  --header-h: 4.25rem; /* 68px ponsel */
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --header-h: 5.5rem; /* 88px desktop */
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    @apply bg-white font-sans text-base leading-[1.55] text-ink antialiased md:text-[17px] md:leading-[1.6];
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display font-normal;
+  }
+
+  /* Fokus keyboard selalu terlihat; warna mengikuti teks (putih di biru, navy di kuning/putih). */
+  :focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-ink);
+  }
+}
+
+/* Latar biru dengan garis kisi tipis, ciri khas desain. */
+@utility bg-grid {
+  background-color: var(--color-brand);
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.13) 1px, transparent 1px);
+  background-size: 32px 32px;
+
+  @media (min-width: 48rem) {
+    background-size: 40px 40px;
+  }
+}
+
+/*
+ * Gerakan masuk.
+ * - `animate-rise`: urutan saat halaman dimuat (hero). Jeda = `--d` x 110 ms.
+ * - `data-reveal` dan `data-reveal-group`: muncul saat di-scroll (komponen `Reveal`).
+ *   Memakai `animation` (bukan `transition`) agar tidak mengganggu efek hover elemen yang sama.
+ */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+}
+
+@keyframes rise-left {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+}
+
+@keyframes rise-right {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+}
+
+@keyframes rise-zoom {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+@keyframes draw-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@utility animate-rise {
+  animation: rise 900ms var(--ease-out-expo) backwards;
+  animation-delay: calc(var(--d, 0) * 110ms);
+}
+
+@utility animate-draw {
+  transform-origin: left;
+  animation: draw-x 1100ms var(--ease-out-expo) 300ms backwards;
+}
+
+[data-reveal][data-in-view='false'] {
+  opacity: 0;
+}
+
+[data-reveal][data-in-view='true'] {
+  animation: rise 800ms var(--ease-out-expo) backwards;
+  animation-delay: calc(var(--reveal-i, 0) * 90ms);
+}
+
+[data-reveal='left'][data-in-view='true'] {
+  animation-name: rise-left;
+}
+
+[data-reveal='right'][data-in-view='true'] {
+  animation-name: rise-right;
+}
+
+[data-reveal='zoom'][data-in-view='true'] {
+  animation-name: rise-zoom;
+}
+
+/* Grup: anak langsung dan item daftar muncul berurutan; daftar itu sendiri tidak ikut dianimasikan. */
+[data-reveal-group] > *,
+[data-reveal-group] :is(ul, ol, dl) > * {
+  --i: 0;
+}
+
+[data-reveal-group] > :nth-child(2),
+[data-reveal-group] :is(ul, ol, dl) > :nth-child(2) {
+  --i: 1;
+}
+
+[data-reveal-group] > :nth-child(3),
+[data-reveal-group] :is(ul, ol, dl) > :nth-child(3) {
+  --i: 2;
+}
+
+[data-reveal-group] > :nth-child(4),
+[data-reveal-group] :is(ul, ol, dl) > :nth-child(4) {
+  --i: 3;
+}
+
+[data-reveal-group] > :nth-child(5),
+[data-reveal-group] :is(ul, ol, dl) > :nth-child(5) {
+  --i: 4;
+}
+
+[data-reveal-group] > :nth-child(6),
+[data-reveal-group] :is(ul, ol, dl) > :nth-child(6) {
+  --i: 5;
+}
+
+[data-reveal-group] > :nth-child(7),
+[data-reveal-group] :is(ul, ol, dl) > :nth-child(7) {
+  --i: 6;
+}
+
+[data-reveal-group] > :nth-child(n + 8),
+[data-reveal-group] :is(ul, ol, dl) > :nth-child(n + 8) {
+  --i: 7;
+}
+
+[data-reveal-group][data-in-view='false'] > :not(ul, ol, dl),
+[data-reveal-group][data-in-view='false'] :is(ul, ol, dl) > * {
+  opacity: 0;
+}
+
+[data-reveal-group][data-in-view='true'] > :not(ul, ol, dl),
+[data-reveal-group][data-in-view='true'] :is(ul, ol, dl) > * {
+  animation: rise 800ms var(--ease-out-expo) backwards;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+
+/* Bilah progres scroll di tepi atas layar (hanya di browser yang mendukung scroll-driven animation). */
+@keyframes scroll-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.scroll-progress {
+  display: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  .scroll-progress {
+    display: block;
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 70;
+    height: 3px;
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    pointer-events: none;
+    animation: scroll-progress linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-draw,
+  .scroll-progress,
+  [data-reveal],
+  [data-reveal-group] * {
+    animation: none !important;
+  }
+
+  [data-reveal][data-in-view='false'],
+  [data-reveal-group][data-in-view='false'] > *,
+  [data-reveal-group][data-in-view='false'] :is(ul, ol, dl) > * {
+    opacity: 1 !important;
+  }
+}
+
+/* Cetak bukti pendaftaran PPDB: hanya kotak bukti yang tercetak. */
+@media print {
+  [data-reveal][data-in-view='false'],
+  [data-reveal-group][data-in-view='false'] > *,
+  [data-reveal-group][data-in-view='false'] :is(ul, ol, dl) > * {
+    opacity: 1 !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #bukti-pendaftaran,
+  #bukti-pendaftaran * {
+    visibility: visible;
+  }
+
+  #bukti-pendaftaran {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 2rem;
+  }
+}

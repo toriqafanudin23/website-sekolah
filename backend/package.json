@@ -1,0 +1,23 @@
+{
+  "name": "sdn1kembaran-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "API Express untuk website SDN 1 Kembaran (Supabase, dideploy terpisah di Vercel).",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "node --watch --env-file=.env src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test",
+    "create-admin": "node --env-file=.env scripts/create-admin.js",
+    "check": "node --env-file=.env scripts/check-supabase.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^8.0.0"
+  }
+}
